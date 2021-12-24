@@ -10,9 +10,6 @@ import email
 import imaplib
 from bs4 import BeautifulSoup 
 
-
-
-
 def automatedquotes():
     user = 'automatedquotesnj@gmail.com'
     password = 'Wassermans350'
