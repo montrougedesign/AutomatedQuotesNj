@@ -65,17 +65,14 @@ def automatedquotes():
                 receivedticker = soup.td.get_text(strip=True)
                 receivedticker_up = receivedticker.upper()
                 From_ = email_message['from']
-            
+                finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
                 
 
-
-                finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
-
+                        
                 price = str(finnhub_client.quote(receivedticker_up)['c'])
                 percent_change = str(finnhub_client.quote(receivedticker_up)['dp'])
                 Previous_close = str(finnhub_client.quote(receivedticker_up)['pc'])
-                change = str(finnhub_client.quote(receivedticker_up)['d'])
-
+                change = str(finnhub_client.quote(receivedticker_up)['d']) 
 
 
                 end = receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previos close  " + "$"+ Previous_close
@@ -84,8 +81,9 @@ def automatedquotes():
                 print(time.asctime() + '\n' +From_)
                 sendserver.sendmail('automatedquotesnj@gmail.com', From_ ,end)
 
-                print(end)
-                #vz--------------
+                print(end)          
+            
+            #vz--------------
             elif content_type == 'text/plain':
                 msg = part.get_payload()
                 msg_ticker =msg.strip()
