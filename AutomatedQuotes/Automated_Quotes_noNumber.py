@@ -75,7 +75,7 @@ def automatedquotes():
                 change = str(finnhub_client.quote(receivedticker_up)['d']) 
 
 
-                end = receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previos close  " + "$"+ Previous_close
+                end = receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
 
 
                 print(time.asctime() + '\n' +From_)
@@ -100,7 +100,7 @@ def automatedquotes():
 
 
 
-                end = receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previos close  " + "$"+ Previous_close
+                end = receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
 
 
                 print(time.asctime() + '\n' +From_vz)
