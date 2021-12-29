@@ -74,7 +74,7 @@ def automatedquotes():
                 receivedticker_up = receivedticker.upper()
             #for vz-----------    
             elif content_type == 'text/plain':
-                msg_ticker =msg_.strip()
+                msg_ticker = msg_.strip()
                 receivedticker_up = msg_ticker.upper()
             else:
                 print("not a content type")       
@@ -82,26 +82,46 @@ def automatedquotes():
 
     if list_length >= 1:
 
-        get_type()              
+        get_type()
+
+        if receivedticker_up == "WL1":
+            From_ = email_message['from']
+            finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
+            wl1 = ['ABR','SUN','TTWO']
+            for x in wl1:
+                price = str(finnhub_client.quote(x)['c'])
+                percent_change = str(finnhub_client.quote(x)['dp'])
+                Previous_close = str(finnhub_client.quote(x)['pc'])
+                change = str(finnhub_client.quote(x)['d']) 
+
+
+                end = x + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
+
+
+                print(time.asctime() + '\n' +From_)
+                sendserver.sendmail('automatedquotesnj@gmail.com', From_ ,end)
+
+                print(end)
+        else:             
                 
-        From_ = email_message['from']
-        finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
-                
+            From_ = email_message['from']
+            finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
+                    
 
-                        
-        price = str(finnhub_client.quote(receivedticker_up)['c'])
-        percent_change = str(finnhub_client.quote(receivedticker_up)['dp'])
-        Previous_close = str(finnhub_client.quote(receivedticker_up)['pc'])
-        change = str(finnhub_client.quote(receivedticker_up)['d']) 
-
-
-        end = receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
+                            
+            price = str(finnhub_client.quote(receivedticker_up)['c'])
+            percent_change = str(finnhub_client.quote(receivedticker_up)['dp'])
+            Previous_close = str(finnhub_client.quote(receivedticker_up)['pc'])
+            change = str(finnhub_client.quote(receivedticker_up)['d']) 
 
 
-        print(time.asctime() + '\n' +From_)
-        sendserver.sendmail('automatedquotesnj@gmail.com', From_ ,end)
+            end = receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
 
-        print(end)          
+
+            print(time.asctime() + '\n' +From_)
+            sendserver.sendmail('automatedquotesnj@gmail.com', From_ ,end)
+
+            print(end)          
             
     else:
         print(time.asctime() + '\n' +'nothing to show')
