@@ -1,5 +1,6 @@
 from email import message
 from typing import Counter
+from bs4.element import DEFAULT_OUTPUT_ENCODING
 from requests.models import Response
 import schedule
 import smtplib
@@ -34,15 +35,18 @@ def automatedquotes():
     new_item_list_delete = delete_data[0].split()
 
     list_length = len(new_item_list)
+
+    
+    
     
 
-    if list_length >= 1:
+    def get_type():
 
-
+        # extract the data
         for x in new_item_list:
             result2, email_data = mail.uid('fetch', x, '(RFC822)')
             raw_email = email_data[0][1].decode("utf-8")
-
+            global email_message
             email_message = email.message_from_string(raw_email)
             counter = 1
             for part in email_message.walk():
@@ -53,72 +57,61 @@ def automatedquotes():
                     ext = '.html'
                     filename = 'mes-part-%08d%s' %( counter,ext)
                     counter += 1
-
-
+            
+            global msg_
+            msg_ = part.get_payload()
+            global content_type
             content_type = part.get_content_type()
+            
+            
+            #format the data
 
-
-                #att----------------
+            #for att----------
             if content_type == 'text/html':
-                html_ = part.get_payload()
-                soup = BeautifulSoup(html_, "html.parser")
+                soup = BeautifulSoup(msg_, "html.parser")
                 receivedticker = soup.td.get_text(strip=True)
+                global receivedticker_up
                 receivedticker_up = receivedticker.upper()
-                From_ = email_message['from']
-                finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
+            #for vz-----------    
+            elif content_type == 'text/plain':
+                msg_ticker =msg_.strip()
+                receivedticker_up = msg_ticker.upper()
+            else:
+                print("not a content type")       
+
+
+    if list_length >= 1:
+
+        get_type()              
+                
+        From_ = email_message['from']
+        finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
                 
 
                         
-                price = str(finnhub_client.quote(receivedticker_up)['c'])
-                percent_change = str(finnhub_client.quote(receivedticker_up)['dp'])
-                Previous_close = str(finnhub_client.quote(receivedticker_up)['pc'])
-                change = str(finnhub_client.quote(receivedticker_up)['d']) 
+        price = str(finnhub_client.quote(receivedticker_up)['c'])
+        percent_change = str(finnhub_client.quote(receivedticker_up)['dp'])
+        Previous_close = str(finnhub_client.quote(receivedticker_up)['pc'])
+        change = str(finnhub_client.quote(receivedticker_up)['d']) 
 
 
-                end = receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
+        end = receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
 
 
-                print(time.asctime() + '\n' +From_)
-                sendserver.sendmail('automatedquotesnj@gmail.com', From_ ,end)
+        print(time.asctime() + '\n' +From_)
+        sendserver.sendmail('automatedquotesnj@gmail.com', From_ ,end)
 
-                print(end)          
+        print(end)          
             
-            #vz--------------
-            elif content_type == 'text/plain':
-                msg = part.get_payload()
-                msg_ticker =msg.strip()
-                receivedticker_up = msg_ticker.upper()
-                From_vz = email_message['from']
+    else:
+        print(time.asctime() + '\n' +'nothing to show')
 
-
-                finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
-
-                price = str(finnhub_client.quote(receivedticker_up)['c'])
-                percent_change = str(finnhub_client.quote(receivedticker_up)['dp'])
-                Previous_close = str(finnhub_client.quote(receivedticker_up)['pc'])
-                change = str(finnhub_client.quote(receivedticker_up)['d'])
-
-
-
-                end = receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
-
-
-                print(time.asctime() + '\n' +From_vz)
-                sendserver.sendmail('automatedquotesnj@gmail.com', From_vz ,end)
-
-                print(end)
-                
-                
-            else:
-                print('not supported')
-
-        for num in new_item_list_delete:
-            mail.store(num,'+FLAGS','\\Deleted')
+    for num in new_item_list_delete:
+        mail.store(num,'+FLAGS','\\Deleted')
 
 
         mail.expunge()        
-    else:
-        print(time.asctime() + '\n' +'nothing to show')
+        
 schedule.every(60).seconds.do(automatedquotes)
 
 while 1:
