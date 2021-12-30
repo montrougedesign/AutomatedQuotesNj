@@ -91,14 +91,14 @@ def automatedquotes():
             wl1_result =[]
 
             for x in wl1:
-                name = str(finnhub_client.company_profile2(symbol = x)['name']) 
+                #name = str(finnhub_client.company_profile2(symbol = x)['name']) 
                 price = str(finnhub_client.quote(x)['c'])
                 percent_change = str(finnhub_client.quote(x)['dp'])
                 Previous_close = str(finnhub_client.quote(x)['pc'])
                 change = str(finnhub_client.quote(x)['d']) 
 
 
-                end = "\n" + x + "\n" + name + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
+                end = "\n" + x + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
                 wl1_result.append(end)
 
             wl1_result_str ="".join(map(str,wl1_result))
@@ -112,14 +112,14 @@ def automatedquotes():
             finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
                     
 
-            name = str(finnhub_client.company_profile2(symbol = receivedticker_up)['name'])               
+            #name = str(finnhub_client.company_profile2(symbol = receivedticker_up)['name'])               
             price = str(finnhub_client.quote(receivedticker_up)['c'])
             percent_change = str(finnhub_client.quote(receivedticker_up)['dp'])
             Previous_close = str(finnhub_client.quote(receivedticker_up)['pc'])
             change = str(finnhub_client.quote(receivedticker_up)['d']) 
 
 
-            end = "\n" + receivedticker_up + "\n" + name + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
+            end = "\n" + receivedticker_up + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%" "\n" + "Previous Close  " + "$"+ Previous_close
 
 
             print("\n" + time.asctime() + '\n' +From_)
