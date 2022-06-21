@@ -15,7 +15,7 @@ import schedule
 finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
 
 
-wl = ['WL1','WL2','WL3','WL4','WL5']
+wl = ['WL1','WL2','WL3','WL4','WL5','WL6','WL7']
 
 tickers = [['T','VZ','KBWD'],
         ['ADBE','ALGN','ISGR'],
