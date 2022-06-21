@@ -414,7 +414,7 @@ def test():
                     number +=1
 
                 elif text_list[0] == "WL16":
-                    wl16 = ['FB','PINS','NFLX']
+                    wl16 = ['META','PINS','NFLX']
                     wl16_result =[]
 
                     for x in wl16: 
