@@ -17,7 +17,9 @@ finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
 
 wl = ['WL1','WL2','WL3','WL4','WL5','WL6','WL7']
 
-tickers = [['T','VZ','KBWD'],
+tickers = [
+        [],
+        ['T','VZ','KBWD'],
         ['ADBE','ALGN','ISGR'],
         ['NKE','LULU','ETSY'],
         ['V','AXP','PYPL'],
@@ -34,7 +36,7 @@ index = 0
 
 wl_result = []
 
-number = 0
+number = 1
 
 user = 'textaword@gmail.com'
 password = 'mxbqirbsmlwkyesy'
@@ -54,6 +56,8 @@ result, data = mail.uid('search',None, 'ALL')
 new_items = data[0].split()
 #get the length of the new item list (how many emails in the Inbox)
 list_length = len(new_items)
+
+
 
 counter = 0
 if list_length >= 1:
@@ -97,19 +101,17 @@ for w in morelist:
 print(main_list)
 print(all_from)
 
-for d in main_list:
-    for x in wl:
+for x in wl:
+    for d in main_list:
         if (x == d[0]):
             index = wl.index(d[0])
             tictosend = tickers[index]
-    for x in tictosend:
-        price = str(finnhub_client.quote(x)['c'])
-        percent_change = str(finnhub_client.quote(x)['dp'])
-        change = str(finnhub_client.quote(x)['d'])
-        end = "\n" + x + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%"
-        wl_result.append(end)
+        for x in tictosend:
+            price = str(finnhub_client.quote(x)['c'])
+            percent_change = str(finnhub_client.quote(x)['dp'])
+            change = str(finnhub_client.quote(x)['d'])
+            end = "\n" + x + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%"
+            wl_result.append(end)
 
-    wl_result_str ="".join(map(str,wl_result))
-    print(d[0])
-    print(all_from[number])
-    number += 1
+        wl_result_str ="".join(map(str,wl_result))
+print(wl_result_str)    

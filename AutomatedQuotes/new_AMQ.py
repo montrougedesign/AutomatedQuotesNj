@@ -27,7 +27,7 @@ def test():
         sendserver.login(user, password)
 
 
-        #select imbox
+        #select inbox
         mail.select('Inbox')
         #get the inbox
         result, data = mail.uid('search',None, 'ALL')

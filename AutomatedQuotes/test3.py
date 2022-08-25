@@ -25,7 +25,7 @@ tickers = [['T','VZ','KBWD'],
         ['HRB','WBA','FDX'],
         ['CRM','SQ','JPM']]
 
-stock = ['WL4','J']
+stock = [['WL4','J'],['WL2'],['WL5']]
 
 index = 0
 
@@ -34,17 +34,19 @@ wl_result = []
 if len(stock) >1:
 
     for x in wl:
-        if (x == stock[0]):
-            index = wl.index(stock[0])
-            tictosend = tickers[index]
-    for x in tictosend:
-        price = str(finnhub_client.quote(x)['c'])
-        percent_change = str(finnhub_client.quote(x)['dp'])
-        change = str(finnhub_client.quote(x)['d'])
-        end = "\n" + x + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%"
-        wl_result.append(end)
+        for w in stock:
 
-    wl_result_str ="".join(map(str,wl_result))
+            if (x == w[0]):
+                index = wl.index(w[0])
+                tictosend = tickers[index]
+                for x in tictosend:
+                    price = str(finnhub_client.quote(x)['c'])
+                    percent_change = str(finnhub_client.quote(x)['dp'])
+                    change = str(finnhub_client.quote(x)['d'])
+                    end = "\n" + x + "\n" + "Price  " + "$" + price + "\n" + "Change  " + "$" +change + "\n" + "Percent Change  " + percent_change + "%"
+                    wl_result.append(end)
+
+                wl_result_str ="".join(map(str,wl_result))
 
 
 
