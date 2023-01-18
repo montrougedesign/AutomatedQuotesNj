@@ -195,10 +195,12 @@ def code():
                         pfcf = 'PFCF: '+ str(raw['metric']['pfcfShareAnnual'])
 
                         mc = 'MC: ' + str(raw['metric']['marketCapitalization'])
+                        
+                        high = '52 Week High: ' + str(raw['metric']['52WeekHigh'])
 
+                        low = '52 Week Low: ' + str(raw['metric']['52WeekLow'])
 
-
-                        all = item_token[0] + '\n' +price +'\n'+ pe + '\n' + roe + '\n' +roa + '\n' +cr + '\n' + bvps + '\n' + gm + '\n' +de + '\n' + ps + '\n' + div + '\n' + pfcf + '\n' + mc
+                        all = item_token[0] + '\n' +price +'\n'+ pe + '\n' + roe + '\n' +roa + '\n' +cr + '\n' + bvps + '\n' + gm + '\n' +de + '\n' + ps + '\n' + div + '\n' + pfcf + '\n' + mc + '\n' + high + '\n' + low
 
                         print('\n' + time_ + "\n " + from_list[counter]+'\n'+ all)
 
@@ -402,7 +404,36 @@ def code():
                         
                         time.sleep(10)
                         counter += 1
+                    elif item_token[1] == "HIGH":
+                        price = str(finnhub_client.quote(item_token[0])['c'])
 
+                        raw = finnhub_client.company_basic_financials(item_token[0],"all")
+
+                        High = str(raw['metric']['52WeekHigh'])
+
+                        last = item_token[0] +"\n"+'Price: '+ price +'\n'+'52 Week High: ' + High
+
+                        print('\n'+ time_ + '\n' + from_list[counter] +'\n'+ last)
+
+                        sendserver.sendmail('textaword@gmail.com', from_list[counter] , last)    
+                        
+                        time.sleep(10)
+                        counter += 1    
+                    elif item_token[1] == "LOW":
+                        price = str(finnhub_client.quote(item_token[0])['c'])
+
+                        raw = finnhub_client.company_basic_financials(item_token[0],"all")
+
+                        Low = str(raw['metric']['52WeekLow'])
+
+                        last = item_token[0] +"\n"+'Price: '+ price +'\n'+'52 Week Low: ' + Low
+
+                        print('\n'+ time_ + '\n' + from_list[counter] +'\n'+ last)
+
+                        sendserver.sendmail('textaword@gmail.com', from_list[counter] , last)    
+                        
+                        time.sleep(10)
+                        counter += 1
                     else:
                         
                         sendserver.sendmail('textaword@gmail.com', from_list[counter] , "Sorry Not a valid input.")
