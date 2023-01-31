@@ -199,9 +199,29 @@ def plainData(UserInput,sendNum):
                 #30
                 ['BLK','BX','JEF'],
                 #31
-                ['SCHG','XLY','IDRV']
+                ['SCHG','XLY','IDRV'],
+                #32
+                ['HAS','HBI','MAT'],
+                #33
+                ['MAR','H','WYNN'],
+                #34
+                ['LOW','HD','SHW'],
+                #35
+                ['MRK','AMGN','ABT'],
+                #36
+                ['SBRA','GMRE','RITM'],
+                #37
+                ['ABR','DOUG','MORT'],
+                #38
+                ['CVX','OXY','DVZN'],
+                #39
+                ['NEE','TAN','SEDG'],          
+                #40
+                ['NU','ALLY','COF'],  
+                #41
+                ['SCHD','XLP','VTV'],                    
                 ]
-    WLNames =['WL1','WL2','WL3','WL4','WL5','WL6','WL7','WL8','WL9','WL10','WL11','WL12','W13','WL14','WL15','WL16','WL17','WL18','WL19','WL20','WL21','WL22','WL23','WL24','WL25','WL26','WL27','WL28','WL29','WL30','WL31' ]     
+    WLNames =['WL1','WL2','WL3','WL4','WL5','WL6','WL7','WL8','WL9','WL10','WL11','WL12','W13','WL14','WL15','WL16','WL17','WL18','WL19','WL20','WL21','WL22','WL23','WL24','WL25','WL26','WL27','WL28','WL29','WL30','WL31','WL32','WL33','WL34','WL35','WL36','WL37','WL38','WL39','WL40','WL41']     
 
     
         
@@ -250,11 +270,11 @@ def emailDB(fromlist):
             emailcounter = emailcounter + 1
         if emailcounter == 0:
             id_cursor = collection.find().sort('_id',-1).limit(1)
-            id = id_cursor[0]['_id']
-            print(id)
-            id = id+1
-            post = {"_id": id,"email": email}  
-            collection.insert_one(post)     
+            id = id_cursor[0]['_id']+1
+            post = {"_id": id,"email": email, "Times": 1}  
+            collection.insert_one(post)  
+        else:
+            collection.update_one({"email":email}, {'$inc':{"Times": 1}})       
             
 def sendEmails():
     db = client["AMQ"]
@@ -277,9 +297,9 @@ def TickersDB(ticker):
         id = id_cursor[0]['_id'] + 1
         collection.insert_one({"_id": id,"Tick": ticker,"Times":1}) 
     else:
-        stuff = collection.find()
-        stuff_found = collection.update_one({"Tick":ticker}, {'$inc':{"Times": 1}})
-        collection.update_one  
+        #stuff = collection.find()
+        collection.update_one({"Tick":ticker}, {'$inc':{"Times": 1}})
+        #collection.update_one  
 
 def Main():
     time_ = time.asctime()
