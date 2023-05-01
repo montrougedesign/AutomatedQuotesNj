@@ -12,16 +12,23 @@ import time
 import schedule
 import pymongo
 import certifi
-
+import datetime
+from finvizfinance.quote import finvizfinance
+#nltk.download('punkt')
 #finnhub api key think
 finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
 #to find the right stl certificate for mongo db
-ca = certifi.where()
+#ca = certifi.where()
 #Mongo database API key think
-client = pymongo.MongoClient("mongodb+srv://MYCoding:QV9BcLxtJqrInZB4@mycoding.pzucnk1.mongodb.net/?retryWrites=true&w=majority",tlsCAFile=ca)
+#client = pymongo.MongoClient("mongodb+srv://MYCoding:QV9BcLxtJqrInZB4@mycoding.pzucnk1.mongodb.net/?retryWrites=true&w=majority",tlsCAFile=ca)
 
 def emailserver():       
     global user 
+    #for testing purposes
+    """user = 'paperstocksnj@gmail.com'
+    password = 'oeurjrdemmeyrffb'"""
+    
+    
     user = 'txtaquote@gmail.com'
     password = 'yumdkitwnqhmixzf'
     receiveserver ='imap.gmail.com'
@@ -55,38 +62,31 @@ def get_text():
         raw_email = email_data[0][1].decode("utf-8")
         #not sure what this does will write it when i figure it out
         email_message = email.message_from_string(raw_email)
-        #gets the email sender
-        #from_list = email_message['From']
-
-        status, delete_data = mail.search(None, 'All')
-
-        new_item_delete = delete_data[0].split()
-
+        #add the email sender to the from_list
+        from_list.append(email_message['From'])
+        #walk trought all the parts of the email
         for part in email_message.walk():
+            # get content type of each part of the email
             content_type = part.get_content_type()
-            msg_ = part.get_payload()
-
-            continue
-
-        if content_type =='text/html':
-            try:
-                #ATT
-                soup = BeautifulSoup(msg_,'html.parser')
-                text = soup.td.get_text(strip=True).upper()
-                item_data_list.append(text)
-            except:
-                #Emails
-                soup = BeautifulSoup(msg_,'html.parser')
-                text = soup.div.get_text(strip=True).upper()
-                item_data_list.append(text)
-        elif content_type == 'text/plain':
-            #VZ
-            text = msg_.strip().upper() 
-            item_data_list.append(text)
-        else:
-            print('not a content type')
-        
-        from_list.append(email_message['From'])    
+            #if the part is 'text/html' or 'text/html' exctract the email content
+            if(content_type == 'text/html'):
+                
+                msg_ = part.get_payload()
+                if content_type =='text/html':
+                    soup = BeautifulSoup(msg_,'html.parser')
+                    try:
+                        #ATT
+                        text = soup.td.get_text(strip=True).upper() 
+                    except:
+                        #Emails
+                        text = soup.div.get_text(strip=True).upper()
+                elif content_type == 'text/plain':
+                    #VZ
+                    text = msg_.strip().upper() 
+                else:
+                    print('not a content type')
+        #Append the parsed message to the list    
+        item_data_list.append(text)    
 
 def token(Input):
     #makes any string to array
@@ -100,11 +100,14 @@ def token(Input):
 def extraData(UserInput,sendNum):
     #get the Raw data so we dont have to call the api more then once
     rawData = finnhub_client.company_basic_financials(UserInput[0],"all")
+    rawData2 = finnhub_client.quote(UserInput[0]) 
+    message = UserInput[0]+"\n"
     # list of all the options
-    tickers = ["PE","ROE","ROA","CR","BVPS","GM","PS","DE","DIV","PFCF","MC","HIGH","LOW"]
+    DataPoints = ["ROE","ROA","CR","BVPS","GM","PS","DE","DIV","PFCF","MC","HIGH","LOW"]
     #list of this coresponding to what is in the othe list to put in the api 
     arrayPrint = [
-        "peBasicExclExtraTTM",
+        #"peBasicExclExtraTTM",
+        #"peNormalizedAnnual",
         "roeRfy",
         "roaRfy",
         "currentRatioAnnual",
@@ -118,23 +121,47 @@ def extraData(UserInput,sendNum):
         "52WeekHigh",
         "52WeekLow"]    
     if (UserInput[1] == "ALL"):
-        price = 'Price| ' + str(finnhub_client.quote(UserInput[0])['c'])
-        
-        all = ""
+        all = f"Price| {str(rawData2['c'])}\n"
         for index, each in enumerate(arrayPrint) :   
-            all +=  str(tickers[index])+ ': ' +str(rawData['metric'][each])+"\n"
-            
-        all = str(all)
-        sendserver.sendmail(user,sendNum,f"{UserInput[0]}\n{price}\n{all}")
+            try:
+                all +=  str(DataPoints[index])+ ': ' +str(rawData['metric'][each])+"\n"
+            except:
+                continue
+        all += f"Day High:  {str(rawData2['h'])} \n"
+        all += f"Day Low: {str(rawData2['l'])}\n"
+        sendserver.sendmail(user,sendNum,f"{UserInput[0]}\n{all}\n")
         print(user)
         print (sendNum)
         print (all)
-    else:
-        for index, ticker in enumerate(tickers) :
-            
+    elif UserInput[1] == "DLOW":
+        
+        message += "Price "  + str(rawData2['c'])+"\n"
+        message += "Day Low "  + str(rawData2['l'])+"\n"
+        sendserver.sendmail(user,sendNum,message)  
+        print(f"{user}\n{sendNum}\n{message}\n") 
+    elif UserInput[1] == "DHIGH":
+        message += "Price " + str(rawData2['c'])+"\n"
+        message += "Day High " +str(rawData2['h'])+"\n"    
+        sendserver.sendmail(user,sendNum,message) 
+        print(f"{user}\n{sendNum}\n{message}\n") 
+    elif UserInput[1] == "NEWS":
+        today = datetime.date.today()
+        rawNews = finnhub_client.company_news(UserInput[0], _from=today, to=today)
+        if len(rawNews) > 0:        
+            for i in rawNews:
+                message += str(i["headline"])+"\n"  
+                message += "-"+"\n"
+            sendserver.sendmail(user,sendNum,message) 
+            print(f"{user}\n{sendNum}\n{message}\n")    
+        else:
+            message += "No News"
+            sendserver.sendmail(user,sendNum,message)
+            print(f"{user}\n{sendNum}\n{message}\n")
+
+    else:    
+        for index, ticker in enumerate(DataPoints):
             if UserInput[1] == ticker:   
-                
-                price = 'Price: ' + str(finnhub_client.quote(UserInput[0])['c'])
+                price = 'Price: ' + str(rawData2['c'])
                 metric = ticker + ': '  + str(rawData['metric'][arrayPrint[index]])
                 sendserver.sendmail(user,sendNum,f"{UserInput[0]}\n{price}\n{metric}")
                 print(user)
@@ -236,7 +263,7 @@ def plainData(UserInput,sendNum):
         if(UserInput[0] == WLName):
             resultArray = []
             for ticker in ListOfTickers[index]:
-                TickersDB(ticker)
+                #TickersDB(ticker)
                 rawData = finnhub_client.quote(ticker)
                 price = 'Price: ' + str(rawData['c'])
                 percent_change = 'Percent Change: ' +  str(rawData['dp'])+'%'
@@ -246,7 +273,7 @@ def plainData(UserInput,sendNum):
             sendserver.sendmail(user,sendNum,result)
             print(user + '\n'+ sendNum + '\n' + result)
     if UserInput[0] not in WLNames:
-        TickersDB(UserInput[0])
+        #TickersDB(UserInput[0])
         rawData = finnhub_client.quote(UserInput[0])
         try:  
             UserInput[0] = finnhub_client.company_profile2(symbol=UserInput[0])["name"]
@@ -265,7 +292,7 @@ def notGoodInput(user,sendNum):
     sendserver.sendmail(user,sendNum,message)
     print(user + '\n' +sendNum + '\n' + message)
 
-def emailDB(fromlist):
+"""def emailDB(fromlist):
     db = client["AMQ"]
     collection = db["Emails"]
     
@@ -281,7 +308,7 @@ def emailDB(fromlist):
             post = {"_id": id,"email": email, "Times": 1}  
             collection.insert_one(post)  
         else:
-            collection.update_one({"email":email}, {'$inc':{"Times": 1}})           
+            collection.update_one({"email":email}, {'$inc':{"Times": 1}})        
 def sendEmails():
     db = client["AMQ"]
     collection = db["Emails"]
@@ -295,7 +322,7 @@ def TickersDB(ticker):
     db = client["AMQ"]
     collection = db["Tickers"]
     results = collection.find({"Tick":ticker})
-    resultCounter = 0;
+    resultCounter = 0
     for result in results:
         resultCounter += 1
     if resultCounter == 0:
@@ -305,15 +332,16 @@ def TickersDB(ticker):
     else:
         #stuff = collection.find()
         collection.update_one({"Tick":ticker}, {'$inc':{"Times": 1}})
-        #collection.update_one  
+        #collection.update_one"""
 
 def Main():
-    time_ = time.asctime()
-    emailserver()
     try:
+        time_ = time.asctime()
+        emailserver()
+        
         if list_length>0:
             get_text()
-            emailDB(from_list)
+            #emailDB(from_list)
             for index, each in enumerate (item_data_list):
                 if len(token(each)) == 2:
                     extraData(token(each),from_list[index])
@@ -323,13 +351,13 @@ def Main():
                     notGoodInput()    
         else:
             print('\n'+ 'stocks' +'\n'+ time_ +'\n'+ "Nothing to show")            
-    except:
-        print("It Passed")
+    except Exception as e:
+        print(e)
         pass    
 
 
 
-schedule.every(20).seconds.do(Main)
+schedule.every(10).seconds.do(Main)
 
 while 1:
     schedule.run_pending()

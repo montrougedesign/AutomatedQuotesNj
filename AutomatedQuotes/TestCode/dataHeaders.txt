@@ -1,0 +1,1 @@
+"PE","ROE","ROA","CR","BVPS","GM","DE","PS","DIV","PFCF","MC","HIGH","LOW","BETA","EARNINGS","OM","ROI","SHORT"

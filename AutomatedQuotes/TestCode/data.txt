@@ -1,0 +1,1 @@
+P/E,ROE,ROA,Current Ratio,Book/sh,Gross Margin,Debt/Eq,P/S,Dividend %,P/FCF,Market Cap,52W Range To,52W Range From,Beta,Earnings,Oper. Margin,ROI,Short Float / Ratio
