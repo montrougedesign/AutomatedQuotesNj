@@ -151,9 +151,10 @@ class Stocks():
         uri = f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={name}&apikey=NBNC70MNF0ALLX8A"
         rawTicks = requests.get(uri).json()["bestMatches"]
         for i, d in enumerate(rawTicks):
-            ticks += f"Ticker: {rawTicks[i]['1. symbol']}\n"
-            ticks += f"Name: {rawTicks[i]['2. name']}\n"
-            ticks += f"-\n"
+            if rawTicks[i]['8. currency'] == 'USD':
+                ticks += f"Ticker: {rawTicks[i]['1. symbol']}\n"
+                ticks += f"Name: {rawTicks[i]['2. name']}\n"
+                ticks += f"-\n"
             
         return ticks  
 class DB():
