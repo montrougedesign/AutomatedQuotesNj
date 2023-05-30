@@ -114,6 +114,7 @@ class DoIt():
                 message = s.GetPrice()
                 print(message)
                 Emails.sendserver.sendmail("paperstocksnj@gmail.com",froms[index],message)
+
             else:
                 if(d[1] == "ALL"):
                     message = s.GetAll()

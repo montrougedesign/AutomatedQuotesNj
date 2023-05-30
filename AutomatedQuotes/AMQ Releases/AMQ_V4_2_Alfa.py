@@ -18,9 +18,9 @@ from finvizfinance.quote import finvizfinance
 #finnhub api key think
 finnhub_client = finnhub.Client(api_key="c6s0ql2ad3ifcngb8qvg")
 #to find the right stl certificate for mongo db
-#ca = certifi.where()
+ca = certifi.where()
 #Mongo database API key think
-#client = pymongo.MongoClient("mongodb+srv://MYCoding:QV9BcLxtJqrInZB4@mycoding.pzucnk1.mongodb.net/?retryWrites=true&w=majority",tlsCAFile=ca)
+client = pymongo.MongoClient("mongodb+srv://MYCoding:QV9BcLxtJqrInZB4@mycoding.pzucnk1.mongodb.net/?retryWrites=true&w=majority",tlsCAFile=ca)
 
 def emailserver():       
     global user 
