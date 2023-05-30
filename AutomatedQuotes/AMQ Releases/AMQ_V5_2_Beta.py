@@ -14,6 +14,7 @@ import pymongo
 import certifi
 import datetime
 from finvizfinance.quote import finvizfinance
+import requests
 
 class Emails():  
     def __init__(self , username , password):
@@ -144,7 +145,17 @@ class Stocks():
                     result += "-"+"\n"        
         else: 
             result +='No News'       
-        return result           
+        return result 
+    def GetTickerFromName(self,name):
+        ticks = ''
+        uri = f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={name}&apikey=NBNC70MNF0ALLX8A"
+        rawTicks = requests.get(uri).json()["bestMatches"]
+        for i, d in enumerate(rawTicks):
+            ticks += f"Ticker: {rawTicks[i]['1. symbol']}\n"
+            ticks += f"Name: {rawTicks[i]['2. name']}\n"
+            ticks += f"-\n"
+            
+        return ticks  
 class DB():
     ca = certifi.where()
     client = pymongo.MongoClient("mongodb+srv://MYCoding:QV9BcLxtJqrInZB4@mycoding.pzucnk1.mongodb.net/?retryWrites=true&w=majority",tlsCAFile=ca)
@@ -183,11 +194,14 @@ class Main():
                                 message = Stocks().GetAll(d[0])
                                 self.SendEmail(self.froms[i],message)
                             elif d[1] == "DHL":
-                                    message = Stocks().DayHighLow(d[0])
-                                    self.SendEmail(self.froms[i],message)
+                                message = Stocks().DayHighLow(d[0])
+                                self.SendEmail(self.froms[i],message)
                             elif d[1] == "NEWS":
-                                    message = Stocks().News(d[0])    
-                                    self.SendEmail(self.froms[i],message)
+                                message = Stocks().News(d[0])    
+                                self.SendEmail(self.froms[i],message)
+                            elif d[1] == "SEARCH":
+                                message = Stocks().GetTickerFromName(d[0])    
+                                self.SendEmail(self.froms[i],message)        
                             else:
                                 message = Stocks().GetOne(d[0],d[1])
                                 self.SendEmail(self.froms[i],message)
