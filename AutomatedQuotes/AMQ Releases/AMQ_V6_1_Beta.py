@@ -80,7 +80,9 @@ class Stocks():
     # this function get the price of the stock from finnhub and the company name from finviz    
     def GetPrice(self,tick):
         rawData  = self.finnhub_client.quote(tick)
-        result = f"{tick}\n" #f"{finvizfinance(tick).ticker_fundament()['Company']}\n"
+        fdata = requests.get(f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={tick}&apikey=NBNC70MNF0ALLX8A").json()
+        
+        result =f"{tick}\n"  
         result +=f"Price: {rawData['c']}\n"  
         result += f"Change: ${rawData['d']}\n"
         result += f"Percent Change: {rawData['dp']}%\n"
@@ -112,16 +114,14 @@ class Stocks():
                 result += f"{head}: {fdata[dataType]}\n"  
                 break
         return result
-    def WatchLists(self,wl,from_):    
-        WLFILE = open("/root/Program/Data/WL.txt", "r").read().split(",\n")
+    def WatchLists(self,wl,from_):
         wl = wl.upper()
         wl = int(wl.strip('WL'))
-        if wl < len(WLFILE):
-            ticks = WLFILE[wl-1].split(",")
-            result =''
-            for i in ticks:
-                DB().NewUse(from_,i)
-                result += self.GetPrice(i)
+        ticks = DB().getWLByUser(from_,wl-1)
+        result =''
+        for i in ticks:
+            DB().NewUse(from_,i)
+            result += self.GetPrice(i)
         return result
     def DayHighLow(self,tick):
         raw = self.finnhub_client.quote(tick)
@@ -159,12 +159,15 @@ class Stocks():
         return ticks  
 class DB():
     ca = certifi.where()
+    
     client = pymongo.MongoClient("mongodb+srv://MYCoding:QV9BcLxtJqrInZB4@mycoding.pzucnk1.mongodb.net/?retryWrites=true&w=majority",tlsCAFile=ca)
+    #to collect user and usage information
     def NewUse(self,userID,tickerID):
         db = self.client["Stocks"]
         collection = db["Users"]
         post = {"User": userID, "Ticker": tickerID}
         collection.insert_one(post)
+    #for the Alpha api    
     def PostLots(self,Function,API_Field):
         db = db = self.client["Stocks"]
         collection = db["Alpha_Vantage"]
@@ -175,12 +178,29 @@ class DB():
         db = db = self.client["Stocks"]
         collection = db["Alpha_Vantage"]
         post = {"Function":Function, "API_Field":API_Field}
-        collection.insert_one(post)       
+        collection.insert_one(post)  
+    #fundamentals          
     def GetAllFundemetals(self):
         db = db = self.client["Stocks"]
         collection = db["Alpha_Vantage"]
         return collection.find()
-        
+    #wl stuff
+    def NewWL(self,user,tickers):    
+        db = self.client["Stocks"]
+        collection = db["WL"]
+        post = {"User": user, "Tickers": tickers}
+        collection.insert_one(post)
+    def getWLByUser(self,user,wlNum):
+        db = self.client["Stocks"]
+        collection = db["WL"]
+        document = collection.find({'User': user}).skip(wlNum).limit(1)[0]["Tickers"].split(',')
+        return document
+    def AddLotsWL(self,user,tickers):
+        db = self.client["Stocks"]
+        collection = db["WL"]
+        for i in tickers:
+            post = {"User": user, "Tickers": i}
+            collection.insert_one(post)
         
 class Main():  
     def run(self):
@@ -231,12 +251,11 @@ class Main():
                             print(e)
                             message = "Not a Ticker"
                             self.SendEmail(self.froms[i],message)
-                    elif len(d) == 3:      
+                    elif len(d) == 3:
+                        #wl add k/lulu/v      
                         if  d[1] == "ADD" and d[0] == "WL":
                             message = d[2].replace("/",",")
-                            f = open("/root/Program/Data/WL.txt", "a")
-                            f.write(f"{message},\n")
-                            f.close()
+                            DB().NewWL(self.froms[i],message)
                             self.SendEmail(self.froms[i],f" you added {message} to watchlist")   
                         else:
                             message = "Not a input"

@@ -20,8 +20,9 @@ ca = certifi.where()
 #Mongo database API key think
 client = pymongo.MongoClient("mongodb+srv://MYCoding:QV9BcLxtJqrInZB4@mycoding.pzucnk1.mongodb.net/?retryWrites=true&w=majority",tlsCAFile=ca)
 
-Message = "Dueto technical difficulties txtaquote@gmail.com will not be working anymore. The new email address is textlivequotes@gmail.com "
-
+#Message = "We are happy to announce that we fixed the ALL function\n and added a SEARCH function to be able to find a ticker for a company name"
+#Message = "Please reach out to me with any issues or suggestions 848.226.2840"
+Message = " The way to use the SEARCH function is\ni.e 'tesla search'" 
 def emailserver():       
     global user 
     user = 'textlivequotes@gmail.com'

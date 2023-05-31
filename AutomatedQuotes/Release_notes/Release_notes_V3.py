@@ -20,7 +20,7 @@ ca = certifi.where()
 #Mongo database API key think
 client = pymongo.MongoClient("mongodb+srv://MYCoding:QV9BcLxtJqrInZB4@mycoding.pzucnk1.mongodb.net/?retryWrites=true&w=majority",tlsCAFile=ca)
 
-Message = "We are excited to announce the release of version 3,\nwhich includes bug fixes and watch list updates.\nPlease reach out with any issues or suggestions 201-636-7985"
+Message = "We are excited to announce the release of version 3,\nwhich includes bug fixes and watch list updates.\nPlease reach out with any issues or suggestions 848.226.2840"
 
 def emailserver():       
     global user 
