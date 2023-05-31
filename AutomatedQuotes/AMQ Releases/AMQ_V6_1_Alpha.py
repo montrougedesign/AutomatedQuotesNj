@@ -89,15 +89,14 @@ class Stocks():
     # this function get the all the data the we previde from finviz
     def GetAll(self,tick):
         tick = tick.upper()
-        result = self.GetPrice(tick)
-        result += self.DayHighLow(tick)
-        fdata = finvizfinance(tick).ticker_fundament()
+        result = self.DayHighLow(tick)
+        fdata = requests.get(f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={tick}&apikey=NBNC70MNF0ALLX8A").json()
+        """"
         file = open("/root/Program/Data/data.txt", "r").read().split(",")
-        headers = open("/root/Program/Data/dataHeaders.txt", "r").read().split(",")
-        for index, head in enumerate(headers) :
-            head = head.strip('\"')
-            dataType = file[index]
-            result += f"{head}: {fdata[dataType]}\n"
+        headers = open("/root/Program/Data/dataHeaders.txt", "r").read().split(",")"""
+        c = DB().GetAllFundemetals()
+        for d in c:
+            result += f"{d['Function']}:{fdata[d['API_Field']]}\n"
         return result
     #this function gets one data point that the user is askes for
     def GetOne(self,tick,headType):
@@ -147,14 +146,16 @@ class Stocks():
             result +='No News'       
         return result 
     def GetTickerFromName(self,name):
-        ticks = ''
+        ticks = f'-\n'
         uri = f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={name}&apikey=NBNC70MNF0ALLX8A"
         rawTicks = requests.get(uri).json()["bestMatches"]
         for i, d in enumerate(rawTicks):
-            ticks += f"Ticker: {rawTicks[i]['1. symbol']}\n"
-            ticks += f"Name: {rawTicks[i]['2. name']}\n"
-            ticks += f"-\n"
-            
+            if len(rawTicks[i]['1. symbol'])>4 and rawTicks[i]['1. symbol'][-4] == '.':
+                continue
+            if float(rawTicks[i]['9. matchScore']) >.3 and rawTicks[i]['8. currency'] == 'USD':
+                ticks += f"Ticker: {rawTicks[i]['1. symbol']}\n"
+                ticks += f"Name: {rawTicks[i]['2. name']}\n"
+                ticks += f"-\n"
         return ticks  
 class DB():
     ca = certifi.where()
@@ -164,16 +165,37 @@ class DB():
         collection = db["Users"]
         post = {"User": userID, "Ticker": tickerID}
         collection.insert_one(post)
+    def PostLots(self,Function,API_Field):
+        db = db = self.client["Stocks"]
+        collection = db["Alpha_Vantage"]
+        for i, f in enumerate(Function):
+            post = {"Function":f, "API_Field":API_Field[i]}
+            collection.insert_one(post)
+    def PostOne(self,Function,API_Field):
+        db = db = self.client["Stocks"]
+        collection = db["Alpha_Vantage"]
+        post = {"Function":Function, "API_Field":API_Field}
+        collection.insert_one(post)       
+    def GetAllFundemetals(self):
+        db = db = self.client["Stocks"]
+        collection = db["Alpha_Vantage"]
+        return collection.find()
         
         
 class Main():  
     def run(self):
         try:
-            self.emailpro = Emails('textlivequotes@gmail.com','hvnhjfsnpsahjbhw')
+            self.emailpro = Emails('paperstocksnj@gmail.com','oeurjrdemmeyrffb')
             self.froms, self.data = self.emailpro.GetDataAndFroms()
             if len(self.data) >0:
                 for i, d in enumerate(self.data):
-                    if len(d) == 1:
+                    if len(d) > 1 and d[-1] == "SEARCH":
+                        d.pop(-1)
+                        name = ' '.join(d)
+                        message = Stocks().GetTickerFromName(name)    
+                        self.SendEmail(self.froms[i],message)   
+                        print(name)
+                    elif len(d) == 1:
                         
                         if len(d[0]) >= 3 and d[0][:2] =="WL":
                             message = Stocks().WatchLists(d[0],self.froms[i])
@@ -205,7 +227,8 @@ class Main():
                             else:
                                 message = Stocks().GetOne(d[0],d[1])
                                 self.SendEmail(self.froms[i],message)
-                        except:
+                        except Exception as e:
+                            print(e)
                             message = "Not a Ticker"
                             self.SendEmail(self.froms[i],message)
                     elif len(d) == 3:      
@@ -228,4 +251,6 @@ schedule.every(10).seconds.do(Main().run)
 
 while 1:
     schedule.run_pending()
-    time.sleep(1)
+    time.sleep(1)      
+    
+#print(Stocks().GetTickerFromName('tesla'))
