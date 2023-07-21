@@ -26,7 +26,7 @@ client = pymongo.MongoClient("mongodb+srv://MYCoding:QV9BcLxtJqrInZB4@mycoding.p
 #Message = "NEW FEATURE watch list. To add a WL you text ex. T/VZ/TMUS ADD. \nThis will create a WL. If this is your first WL the name will be WL1 the second WL2 etc."
 #Message = "You can add as many tickers as you want but for best usage ONLY do 3 for each WL."
 #Message = "To see how many WL you have, use function COUNT. If you have any questions or suggestions, feel free to contact me at \n848.226.2840"
-Message = "Do to technical difficulties please use our new email address LakewoodnjQuotes@gmail.com Sorry for the inconvenience"
+Message = "do to technical difficulties "
 def emailserver():       
     global user 
     user = 'lakewoodnjQuotes@gmail.com'

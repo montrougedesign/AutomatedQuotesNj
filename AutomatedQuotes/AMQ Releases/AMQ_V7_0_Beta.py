@@ -15,6 +15,8 @@ import certifi
 import datetime
 from finvizfinance.quote import finvizfinance
 import requests
+from groupy import Client
+
 
 nltk.download('punkt')
 
@@ -240,6 +242,48 @@ class DB():
         return str(number)
 
 
+class GroupMe():
+    client = Client.from_token('P4q9frX8NOvojQcCyb0kjuLRAzOxX9H32NJHR73C')
+
+    def AddChat(self, user, message):
+        added = f"Added {user}"
+        not_added = f"Was not able to add {user}"
+        self.client.groups.create(name=user)
+        g = self.client.groups.list_all()
+        time.sleep(1)
+        for g in g:
+            if g.name == user:
+                try:
+                    ug = self.client.groups.get(g.id)
+                    ug.memberships.add(
+                        user, phone_number=user[:10])
+
+                    print(added)
+                    time.sleep(1)
+                    ug.post(message)
+                except:
+                    print(not_added)
+
+    def exsit(self, user):
+        groups = self.client.groups.list_all()
+        for g in groups:
+            if g.name == user:
+                return g.id
+            else:
+                return None
+
+    def send_message(self, message, user):
+        group = self.exsit(user)
+        # print(group)
+        if group == None:
+            self.AddChat(user, message)
+            print(message)
+        else:
+
+            self.client.groups.get(group).post(message)
+            print('yes')
+
+
 class Main():
     def run(self):
         try:
@@ -252,7 +296,6 @@ class Main():
                         d.pop(-1)
                         name = ' '.join(d)
                         message = Stocks().GetTickerFromName(name)
-                        
                         self.SendEmail(self.froms[i], message)
                         print(name)
                     elif len(d) == 1:
@@ -314,12 +357,17 @@ class Main():
             print(e)
 
     def SendEmail(self, from_, message):
-        self.emailpro.sendserver.sendmail(
-            self.emailpro.username, from_, message)
+        number_ver = from_[11]
+        if number_ver == 'm' or number_ver == 'v':
+            GroupMe().send_message(message, from_)
+        else:
+            self.emailpro.sendserver.sendmail(
+                self.emailpro.username, from_, message)
         print(f"{time.asctime()}\n{from_}\n{message}")
 
 
 schedule.every(10).seconds.do(Main().run)
+
 
 while 1:
     schedule.run_pending()
